@@ -1,0 +1,27 @@
+1. install python
+2. create venv - python -m venv venv 
+3. activeate venv - venv\Scripts\activate
+
+now if interpreter can't find pathon of venv then use 
+
+ctl+shift+p -> Python: Select Interpreter -> D:\fastapi\intro\venv\Scripts\python.exe
+
+or ctl+shift+p -> Enter interpreter path...-> D:\fastapi\intro\venv\Scripts\python.exe
+
+--------------
+folder structure
+myapp(folder)
+    ->app(folder)
+       -->db
+       -->prodcut
+       -->user
+       --__init__.py
+       -->main.py(Entery point for our app)
+    ->tests(folder)
+    ->venv
+    ->.env
+    ->requirements.txt
+
+
+
+
