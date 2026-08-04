@@ -1,0 +1,5 @@
+
+in path parameter order matters, it will alwasy check whic is written first,
+if in our route some static path is there so in this case we need to write 
+first static path then dynamic path
+refer ------main2.py
