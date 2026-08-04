@@ -8,6 +8,13 @@ ctl+shift+p -> Python: Select Interpreter -> D:\fastapi\intro\venv\Scripts\pytho
 
 or ctl+shift+p -> Enter interpreter path...-> D:\fastapi\intro\venv\Scripts\python.exe
 
+
+the install fastapi
+
+
+-----  pip install "fastapi[standard]"
+----- then run this ->  fastapi dev main.py
+
 --------------
 folder structure
 myapp(folder)
@@ -22,6 +29,12 @@ myapp(folder)
     ->.env
     ->requirements.txt
 
+--------
+for documents just add the /doc
+eg- http://127.0.0.1:8000/doc
+
+and for re doc add 
+http://127.0.0.1:8000/redoc
 
 
 
