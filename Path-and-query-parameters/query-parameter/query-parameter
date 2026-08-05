@@ -1,0 +1,407 @@
+
+Bilkul bhai. **Query Parameters** FastAPI ka bahut important concept hai. Ek baar samajh gaya to APIs padhna aur banana dono easy ho jayega.
+
+---
+
+# Pehle ye samajh
+
+Suppose tumhare paas products hain:
+
+```python
+products = [
+    {"id": 1, "name": "Mouse", "price": 500},
+    {"id": 2, "name": "Keyboard", "price": 1000},
+    {"id": 3, "name": "Monitor", "price": 8000},
+]
+```
+
+Ab user kya-kya request kar sakta hai?
+
+* Give me product with id = 1
+* Give me products whose price is less than 1000
+* Give me products named Mouse
+* Give me first 10 products
+
+Sabke liye alag-alag routes banaoge?
+
+```
+/products/1
+/products/mouse
+/products/price/1000
+/products/first10
+```
+
+❌ Ye scalable nahi hai.
+
+Isliye Query Parameters use hote hain.
+
+---
+
+# Query Parameter kya hota hai?
+
+Jo URL me `?` ke baad aata hai.
+
+Example
+
+```
+/products?name=Mouse
+```
+
+Yahan
+
+```
+name
+```
+
+parameter hai
+
+Aur
+
+```
+Mouse
+```
+
+uski value hai.
+
+---
+
+## Structure
+
+```
+URL?key=value
+```
+
+Example
+
+```
+/products?price=1000
+```
+
+```
+price -> key
+
+1000 -> value
+```
+
+---
+
+# FastAPI me kaise likhte hain?
+
+```python
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/products")
+async def get_products(name: str):
+    return {"name": name}
+```
+
+Ab request
+
+```
+GET /products?name=Mouse
+```
+
+Output
+
+```json
+{
+    "name": "Mouse"
+}
+```
+
+Notice karo
+
+Route me
+
+```
+/products
+```
+
+hai.
+
+Function me
+
+```python
+name: str
+```
+
+hai.
+
+FastAPI automatically samajh gaya ki ye query parameter hai.
+
+---
+
+# Agar do query parameters ho?
+
+```python
+@app.get("/products")
+async def get_products(name: str, price: int):
+    return {
+        "name": name,
+        "price": price
+    }
+```
+
+Request
+
+```
+GET /products?name=Mouse&price=500
+```
+
+Output
+
+```json
+{
+    "name":"Mouse",
+    "price":500
+}
+```
+
+Multiple query parameters ko `&` se separate karte hain.
+
+---
+
+# Real Example
+
+Suppose
+
+```python
+products = [
+    {"id":1,"name":"Mouse","price":500},
+    {"id":2,"name":"Keyboard","price":1000},
+    {"id":3,"name":"Monitor","price":8000},
+]
+```
+
+Search by name
+
+```python
+@app.get("/products")
+async def get_product(name: str):
+
+    for product in products:
+        if product["name"].lower() == name.lower():
+            return product
+
+    return {"message":"Not Found"}
+```
+
+Request
+
+```
+GET /products?name=mouse
+```
+
+Output
+
+```json
+{
+    "id":1,
+    "name":"Mouse",
+    "price":500
+}
+```
+
+---
+
+# Optional Query Parameter
+
+Suppose user name de bhi sakta hai aur nahi bhi.
+
+```python
+@app.get("/products")
+async def get_products(name: str = None):
+    return {"name": name}
+```
+
+Now
+
+```
+/products
+```
+
+Output
+
+```json
+{
+    "name": null
+}
+```
+
+Aur
+
+```
+/products?name=Mouse
+```
+
+Output
+
+```json
+{
+    "name":"Mouse"
+}
+```
+
+---
+
+# Default Value
+
+```python
+@app.get("/products")
+async def get_products(limit: int = 10):
+    return {"limit": limit}
+```
+
+Agar user
+
+```
+/products
+```
+
+likhe
+
+Output
+
+```json
+{
+    "limit":10
+}
+```
+
+Agar
+
+```
+/products?limit=5
+```
+
+Output
+
+```json
+{
+    "limit":5
+}
+```
+
+---
+
+# Multiple Filters
+
+Ye production me bahut use hota hai.
+
+```python
+@app.get("/products")
+async def get_products(
+    name: str = None,
+    min_price: int = None,
+    max_price: int = None
+):
+    return {
+        "name": name,
+        "min_price": min_price,
+        "max_price": max_price
+    }
+```
+
+Request
+
+```
+GET /products?name=Mouse&min_price=100&max_price=1000
+```
+
+Output
+
+```json
+{
+    "name":"Mouse",
+    "min_price":100,
+    "max_price":1000
+}
+```
+
+---
+
+# Difference Between Path Parameter and Query Parameter
+
+## Path Parameter
+
+Resource ko identify karta hai.
+
+```python
+@app.get("/products/{id}")
+async def get_product(id: int):
+    ...
+```
+
+Request
+
+```
+/products/5
+```
+
+Yahan user bol raha hai:
+
+> "Mujhe **ID 5** wala product do."
+
+---
+
+## Query Parameter
+
+Resource ko filter/search/sort karta hai.
+
+```python
+@app.get("/products")
+async def get_products(name: str):
+    ...
+```
+
+Request
+
+```
+/products?name=Mouse
+```
+
+Yahan user bol raha hai:
+
+> "Products me se **Mouse** search karo."
+
+---
+
+# Production Example
+
+Ye pattern tum bahut jagah dekhoge:
+
+```python
+@app.get("/products")
+async def get_products(
+    search: str = None,
+    page: int = 1,
+    limit: int = 10,
+    sort: str = "price"
+):
+    ...
+Request
+
+GET /products?search=mouse&page=2&limit=20&sort=name
+```
+
+Iska matlab:
+
+* Search = mouse
+* Page = 2
+* 20 records return karo
+* Name ke hisaab se sort karo
+
+## 📌 Yaad rakhne ka shortcut
+
+* **Path Parameter (`/products/1`)** → "Kaunsa resource?" (ID ya unique identifier)
+* **Query Parameter (`/products?name=Mouse`)** → "Us resource ko kaise filter, search, ya paginate karna hai?"
+
+### Real-world examples:
+
+* `GET /users/101` → User ID 101 ko lao.
+* `GET /users?city=Delhi` → Delhi ke sab users lao.
+* `GET /products?min_price=500&max_price=1000` → Price range ke products lao.
+* `GET /orders?page=2&limit=20` → Pagination.
+
