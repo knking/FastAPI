@@ -1,0 +1,436 @@
+
+
+# Path Parameter with Predefined Values kya hota hai?
+refer main3.py for example
+Normally path parameter kuch bhi value le leta hai.
+
+Example:
+
+```python
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/user/{name}")
+def get_user(name: str):
+    return {"name": name}
+```
+
+Ab tum ye sab call kar sakte ho
+
+```
+/user/krishna
+/user/rahul
+/user/abc123
+```
+
+Yaha `name` koi bhi string ho sakti hai.
+
+---
+
+## Lekin agar hum chahte hain ki sirf kuch hi values allow ho?
+
+Jaise
+
+```
+/model/alexnet
+/model/resnet
+/model/lenet
+```
+
+Aur koi ye kare
+
+```
+/model/google
+```
+
+To usko error milna chahiye.
+
+Isi ko bolte hain **Path Parameter with Predefined Values**.
+
+Ye mostly Python ke **Enum** ka use karke kiya jata hai.
+
+---
+
+# Example
+
+```python
+from enum import Enum
+from fastapi import FastAPI
+
+app = FastAPI()
+
+class ModelName(str, Enum):
+    alexnet = "alexnet"
+    resnet = "resnet"
+    lenet = "lenet"
+
+@app.get("/models/{model_name}")
+def get_model(model_name: ModelName):
+    return {"model": model_name}
+```
+
+Ab sirf ye valid hain
+
+```
+/models/alexnet
+/models/resnet
+/models/lenet
+```
+
+Agar user kare
+
+```
+/models/google
+```
+
+Response
+
+```json
+{
+    "detail": [
+        {
+            "type": "enum",
+            "msg": "Input should be 'alexnet', 'resnet' or 'lenet'"
+        }
+    ]
+}
+```
+
+FastAPI automatically validation kar deta hai.
+
+---
+
+# Enum kya hota hai?
+
+Enum matlab
+
+**Fixed list of values**
+
+Example
+
+```python
+class Color(str, Enum):
+    red = "red"
+    blue = "blue"
+    green = "green"
+```
+
+Ab sirf
+
+```
+red
+blue
+green
+```
+
+Allowed hain.
+
+---
+
+# `str` aur `Enum` dono inherit kyu karte hain?
+
+```python
+class ModelName(str, Enum):
+```
+
+### Enum
+
+Ye batata hai ki predefined values hongi.
+
+### str
+
+Ye batata hai ki values string hongi.
+
+Agar `str` na likho
+
+```python
+class ModelName(Enum):
+```
+
+to comparison aur JSON response me thodi dikkat aa sakti hai.
+
+Isliye FastAPI documentation bhi recommend karti hai
+
+```python
+class ModelName(str, Enum):
+```
+
+---
+
+# Request Flow
+
+Maan lo request aayi
+
+```
+GET /models/resnet
+```
+
+FastAPI kya karta hai?
+
+Step 1
+
+URL se nikala
+
+```
+model_name = "resnet"
+```
+
+↓
+
+Step 2
+
+Check karega
+
+```
+Kya "resnet" Enum ke andar hai?
+```
+
+↓
+
+Yes
+
+↓
+
+Function call hoga
+
+```python
+get_model(ModelName.resnet)
+```
+
+Dhyan do
+
+Ye string pass nahi karta.
+
+Ye pass karta hai
+
+```
+ModelName.resnet
+```
+
+---
+
+# Isliye comparison aise hota hai
+
+```python
+if model_name == ModelName.alexnet:
+    ...
+```
+
+Na ki
+
+```python
+if model_name == "alexnet":
+```
+
+---
+
+# Example
+
+```python
+from enum import Enum
+from fastapi import FastAPI
+
+app = FastAPI()
+
+class ModelName(str, Enum):
+    alexnet = "alexnet"
+    resnet = "resnet"
+    lenet = "lenet"
+
+@app.get("/models/{model_name}")
+def get_model(model_name: ModelName):
+
+    if model_name == ModelName.alexnet:
+        return {"message": "AlexNet selected"}
+
+    elif model_name == ModelName.resnet:
+        return {"message": "ResNet selected"}
+
+    return {"message": "LeNet selected"}
+```
+
+---
+
+# Agar actual string chahiye?
+
+Enum object ke andar value hoti hai.
+
+```python
+model_name.value
+```
+
+Example
+
+```python
+print(model_name.value)
+```
+
+Output
+
+```
+resnet
+```
+
+---
+
+# Enum object
+
+Suppose
+
+```
+ModelName.resnet
+```
+
+Ye object hai.
+
+Uske properties
+
+```python
+model_name.name
+```
+
+Output
+
+```
+resnet
+```
+
+Aur
+
+```python
+model_name.value
+```
+
+Output
+
+```
+resnet
+```
+
+Is example me dono same hain.
+
+---
+
+# Swagger UI me kya hoga?
+
+Ye sabse mast feature hai.
+
+Normal path parameter
+
+```
+/models/{model_name}
+```
+
+Swagger bolega
+
+```
+Enter any string
+```
+
+Lekin Enum use karoge
+
+```
+alexnet
+resnet
+lenet
+```
+
+Ye options Swagger me automatically dikh jayenge.
+
+Documentation bhi improve ho jati hai.
+
+---
+
+# Real-world use cases
+
+### 1. Environment
+
+```
+/deploy/dev
+/deploy/qa
+/deploy/prod
+```
+
+```python
+class Environment(str, Enum):
+    dev = "dev"
+    qa = "qa"
+    prod = "prod"
+```
+
+Agar koi likhe
+
+```
+/deploy/testing
+```
+
+To 422 error.
+
+---
+
+### 2. User Role
+
+```
+/users/admin
+/users/customer
+/users/guest
+```
+
+```python
+class UserRole(str, Enum):
+    admin = "admin"
+    customer = "customer"
+    guest = "guest"
+```
+
+---
+
+### 3. Payment Status
+
+```
+/payment/success
+/payment/pending
+/payment/failed
+```
+
+---
+
+### 4. Language Selection
+
+```
+/translate/en
+/translate/hi
+/translate/fr
+```
+
+---
+
+### 5. File Format
+
+```
+/download/pdf
+/download/csv
+/download/excel
+```
+
+---
+
+# Advantages
+
+✅ Invalid values automatically reject ho jati hain.
+✅ Validation likhne ki zarurat nahi padti.
+✅ Swagger UI me dropdown/allowed values dikh jati hain.
+✅ Code readable aur maintainable hota hai.
+✅ Typos aur invalid input ka chance kam ho jata hai.
+
+---
+
+# Interview Question
+
+**Q. Path parameter with predefined values ka use kyu karte hain?**
+
+**Answer:**
+
+> Jab hume path parameter me sirf limited ya predefined values allow karni hoti hain, tab hum Python Enum ka use karte hain. FastAPI automatically validate karta hai ki request me di gayi value Enum ka part hai ya nahi. Agar invalid value aaye to 422 Unprocessable Entity response return karta hai. Isse input validation, API documentation aur code readability improve hoti hai.
+
