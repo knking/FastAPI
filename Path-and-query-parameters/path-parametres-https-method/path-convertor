@@ -1,0 +1,8 @@
+
+if we want a completed path from browser the we just need to add :path in our route
+
+@app.get("/files/{path_of_file:path})
+async def myfile(path_of_file:str):
+return {"your specidied path is " : }
+
+refer main3.py
