@@ -1,5 +1,5 @@
 
-from fastapi import FastAPI
+from fastapi import FastAPI, status
 
 app = FastAPI()
 
@@ -71,7 +71,7 @@ products = [
 async def mydata():
     return {"message":"Hit the other path for data"}
 
-@app.get("/products")
+@app.get("/products",status_code=status.HTTP_200_OK)
 async def getData():
     return products
 
@@ -93,7 +93,7 @@ async def getData(id:int):
 
 #post or create data
 
-@app.post("/products")
+@app.post("/products",status_code=status.HTTP_201_CREATED)
 async def create_product(new_data:dict):
     products.append(new_data)
     return products

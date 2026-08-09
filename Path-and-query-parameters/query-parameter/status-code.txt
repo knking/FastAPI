@@ -1,0 +1,7 @@
+
+fastapi provide various meaningfull status code 
+we need to import status code first
+and then we need to write this in decorator
+@aap.get('/product, status_code=status.HTTP_200_OK)
+
+ideally in fastapi we need to retun status_code - 204 when we are deleting the data
