@@ -130,10 +130,11 @@ async def partial_update(id:int, partial_data:dict):
 
 #             return products
 
-@app.delete("/products/{id}")
+@app.delete("/products/{id}",status_code=status.HTTP_204_NO_CONTENT)
 async def delete_data(id:int):
     for index,product in enumerate(products):
         if product["id"]==id:
             products.pop(index)
 
-            return products
+            # return products
+            ##When we are deleting something then its good practice to return code 204
