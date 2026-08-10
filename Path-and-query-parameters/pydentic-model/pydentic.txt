@@ -1,0 +1,3 @@
+
+we need to validate what is being passsed in body so for this we have pydentic model
+for this we need to import basemodel from pydentic
